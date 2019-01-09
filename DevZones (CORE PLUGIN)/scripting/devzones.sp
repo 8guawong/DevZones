@@ -25,6 +25,8 @@
 
 #define MAX_ZONES 256
 
+#define sModel "models/error.mdl"
+
 int beamColorT[4] =  { 255, 0, 0, 255 };
 int beamColorCT[4] =  { 0, 0, 255, 255 };
 int beamColorN[4] =  { 255, 255, 0, 255 };
@@ -60,12 +62,10 @@ int g_iZones[2048][MAX_ZONES][g_eList]; // max zones = 256
 Handle cvar_filter;
 Handle cvar_mode;
 Handle cvar_checker;
-Handle cvar_model;
 
 bool g_bfilter;
 float checker;
 bool mode_plugin;
-char sModel[192];
 
 Handle cvar_timer = INVALID_HANDLE;
 
@@ -85,7 +85,6 @@ public void OnPluginStart() {
 	cvar_filter = CreateConVar("sm_devzones_filter", "1", "1 = Only allow valid alive clients to be detected in the native zones. 0 = Detect entities and all (you need to add more checkers in the third party plugins).");
 	cvar_mode = CreateConVar("sm_devzones_mode", "1", "0 = Use checks every X seconds for check if a player join or leave a zone, 1 = hook zone entities with OnStartTouch and OnEndTouch (less CPU consume)");
 	cvar_checker = CreateConVar("sm_devzones_checker", "5.0", "checks and beambox refreshs per second, low value = more precise but more CPU consume, More hight = less precise but less CPU consume");
-	cvar_model = CreateConVar("sm_devzones_model", "models/error.mdl", "Use a model for zone entity (IMPORTANT: change this value only on map start)");
 	g_Zones = CreateArray(256);
 	RegAdminCmd("sm_zones", Command_CampZones, ADMFLAG_CUSTOM6);
 	RegConsoleCmd("say", fnHookSay);
@@ -98,7 +97,7 @@ public void OnPluginStart() {
 	HookConVarChange(cvar_filter, CVarChange);
 	HookConVarChange(cvar_checker, CVarChange);
 	HookConVarChange(cvar_mode, CVarChange);
-	HookConVarChange(cvar_model, CVarChange);
+	AutoExecConfig();
 	
 }
 
@@ -121,7 +120,6 @@ public void GetCVars() {
 	g_bfilter = GetConVarBool(cvar_filter);
 	mode_plugin = GetConVarBool(cvar_mode);
 	checker = GetConVarFloat(cvar_checker);
-	GetConVarString(cvar_model, sModel, 192);
 	
 	if (cvar_timer != INVALID_HANDLE) {
 		KillTimer(cvar_timer);
